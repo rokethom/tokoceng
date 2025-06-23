@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Judul akan diisi oleh Javascript -->
+    <title>Memuat Toko...</title> 
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <meta name="theme-color" content="#1e293b"/>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .hero-text-gradient { background: linear-gradient(to right, #34d399, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .slideshow-container { position: relative; }
+        .slideshow-image { display: none; }
+        .slideshow-image.active { display: block; }
+        .slideshow-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: 50%;
+            z-index: 10;
+            transition: background-color 0.2s;
+        }
+        .slideshow-button:hover { background-color: rgba(0, 0, 0, 0.7); }
+        .prev-btn { left: 0.5rem; }
+        .next-btn { right: 0.5rem; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white">
+
+    <div class="container mx-auto px-4">
+
+        <header class="text-center py-16 md:py-24">
+            <img id="site-logo" src="https://placehold.co/150x50/1e293b/ffffff?text=LOGO" alt="Logo Toko" class="mx-auto mb-6 h-12">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight">
+                Selamat Datang di <span id="site-name-display" class="hero-text-gradient">Toko Anda</span>
+            </h1>
+            <p class="mt-4 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto">
+                Temukan produk-produk berkualitas pilihan. Pesan sekarang juga dengan mudah melalui WhatsApp.
+            </p>
+            <a href="#produk" class="mt-8 inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105">
+                Lihat Semua Produk
+            </a>
+        </header>
+
+        <main id="produk">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Produk Unggulan Kami</h2>
+            
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-slate-800 rounded-2xl p-8 flex justify-center items-center col-span-full">
+                    <svg class="w-12 h-12 animate-spin text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <p class="ml-4 text-slate-400">Memuat produk...</p>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="text-center py-12 mt-16 border-t border-slate-700">
+            <p class="text-slate-400">&copy; <span id="year"></span> <span id="footer-site-name">Nama Toko Anda</span>. Dibuat dengan ❤️.</p>
+        </footer>
+
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5Z_5vAVdRhYfU55_cX3hFXr_EqYTOWvw",
+            authDomain: "rokethom05.firebaseapp.com",
+            projectId: "rokethom05",
+            storageBucket: "rokethom05.firebasestorage.app",
+            messagingSenderId: "1070168947719",
+            appId: "1:1070168947719:web:f788c89b36ac1620643ea2"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let nomorWhatsAppAdmin = "6281234567890";
+
+        function orderViaWhatsApp(namaProduk) {
+            const pesanTemplate = `Halo, saya tertarik untuk memesan produk ini: *${namaProduk}*. Mohon informasinya. Terima kasih.`;
+            const pesanEncoded = encodeURIComponent(pesanTemplate);
+            const urlWhatsApp = `https://wa.me/${nomorWhatsAppAdmin}?text=${pesanEncoded}`;
+            window.open(urlWhatsApp, '_blank');
+        }
+
+        // Ambil Pengaturan Toko (Nama, Logo, WA)
+        db.collection("settings").doc("config").onSnapshot((doc) => {
+            if (doc.exists) {
+                const settings = doc.data();
+                nomorWhatsAppAdmin = settings.whatsappNumber || "6281234567890";
+                document.title = settings.siteName || "Toko Online";
+                document.getElementById('site-name-display').textContent = settings.siteName || "Toko Anda";
+                document.getElementById('footer-site-name').textContent = settings.siteName || "Nama Toko Anda";
+                if(settings.logoUrl) {
+                   document.getElementById('site-logo').src = settings.logoUrl;
+                }
+            }
+        });
+
+        // Ambil dan tampilkan produk
+        const productGrid = document.getElementById('product-grid');
+        db.collection("products").onSnapshot((querySnapshot) => {
+            productGrid.innerHTML = '';
+            if(querySnapshot.empty){
+                productGrid.innerHTML = `<p class="text-slate-400 text-center col-span-full">Belum ada produk. Silakan tambahkan melalui halaman admin.</p>`;
+                return;
+            }
+            querySnapshot.forEach((doc) => {
+                const product = doc.data();
+                const productId = doc.id;
+                
+                // Membuat HTML untuk slideshow
+                let imagesHtml = '';
+                if (product.imageUrls && product.imageUrls.length > 0) {
+                    product.imageUrls.forEach((url, index) => {
+                        imagesHtml += `<img src="${url}" alt="Gambar ${product.name} ${index + 1}" class="slideshow-image ${index === 0 ? 'active' : ''} w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/600x400/1e293b/ffffff?text=Gambar+Error';">`;
+                    });
+                } else {
+                    imagesHtml = `<img src="https://placehold.co/600x400/1e293b/ffffff?text=Produk" alt="Gambar ${product.name}" class="slideshow-image active w-full h-56 object-cover">`;
+                }
+
+                const productCard = `
+                    <div class="bg-slate-800 rounded-2xl shadow-lg overflow-hidden group">
+                        <div class="relative slideshow-container" id="slideshow-${productId}" data-current-index="0">
+                            ${imagesHtml}
+                            ${product.imageUrls && product.imageUrls.length > 1 ? `
+                            <button class="slideshow-button prev-btn" onclick="changeSlide('${productId}', -1)">&#10094;</button>
+                            <button class="slideshow-button next-btn" onclick="changeSlide('${productId}', 1)">&#10095;</button>
+                            ` : ''}
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">${product.name}</h3>
+                            <p class="text-slate-400 mb-4 text-sm h-16">${product.description}</p>
+                            <div class="text-2xl font-bold text-emerald-400 mb-6">Rp ${new Intl.NumberFormat('id-ID').format(product.price)}</div>
+                            <button onclick="orderViaWhatsApp('${product.name}')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 rounded-lg flex items-center justify-center space-x-2">
+                                Pesan via WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productGrid.innerHTML += productCard;
+            });
+        });
+        
+        function changeSlide(productId, direction) {
+            const slideshow = document.getElementById(`slideshow-${productId}`);
+            const images = slideshow.getElementsByClassName('slideshow-image');
+            let currentIndex = parseInt(slideshow.dataset.currentIndex);
+
+            images[currentIndex].classList.remove('active');
+            
+            currentIndex += direction;
+
+            if (currentIndex >= images.length) {
+                currentIndex = 0;
+            } else if (currentIndex < 0) {
+                currentIndex = images.length - 1;
+            }
+            
+            images[currentIndex].classList.add('active');
+            slideshow.dataset.currentIndex = currentIndex;
+        }
+
+        document.getElementById('year').textContent = new Date().getFullYear();
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js'); }); }
+    </script>
+</body>
+</html>
