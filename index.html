@@ -93,7 +93,7 @@
         let nomorWhatsAppAdmin = "6281234567890";
 
         function orderViaWhatsApp(namaProduk) {
-            const pesanTemplate = `Halo Admin https://tokoceng.vercel.app saya tertarik untuk memesan produk ini: *${namaProduk}*. <br>Mohon informasinya. Terima kasih.`;
+            const pesanTemplate = `Halo Admin https://tokoceng.vercel.app saya tertarik untuk memesan produk ini: *${namaProduk}*. </br>Mohon informasinya. Terima kasih.`;
             const pesanEncoded = encodeURIComponent(pesanTemplate);
             const urlWhatsApp = `https://wa.me/${nomorWhatsAppAdmin}?text=${pesanEncoded}`;
             window.open(urlWhatsApp, '_blank');
